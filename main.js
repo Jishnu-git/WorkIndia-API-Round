@@ -3,8 +3,6 @@ const app = express();
 const session = require("express-session");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("Static/HTML"));
-app.use(express.static("Static/JS"));
 app.use(session({
     secret: "WorkIndia",
     saveUninitialized: false,
@@ -31,20 +29,24 @@ db.connect((err) => {
 });
 
 const Cypher = require("./Services/CypherService");
+const cypher = new Cypher();
 
 app.post("/app/login/", (req, res) => {
     const user = req.body;
     db.query("SELECT COUNT(*) AS valid FROM users WHERE username = ? AND password = ?", [user.username, user.password], (err, result) => {
         if (err || result[0].valid == 0) {
+            if (!err) err = "Invalid username or password";
             res.json({
                 status: "failure",
-                reason: err | "Invalid username"
+                reason: err
             });
-        }
-        req.session.user = user.username;
+        } else {
+            req.session.user = user.username;
             res.json({
                 status: "success"
             });
+        }
+        
     });
 });
 
@@ -72,7 +74,7 @@ app.post("/app/register/", (req, res) => {
 })
 
 app.get("/app/sites/list/", (req, res) => {
-    const user = "test" //req.session.user;
+    const user = req.session.user;
     if (!user) {
         res.json({
             status: "failure",
@@ -87,6 +89,9 @@ app.get("/app/sites/list/", (req, res) => {
                             reason: err
                          });
                      } else {
+                         for (var i = 0; i < result.length; i++) {
+                             result[i].password = cypher.decryptText(Buffer.from(result[i].password, "hex"));
+                         }
                          res.json(result);
                      }   
                   });
@@ -94,7 +99,7 @@ app.get("/app/sites/list/", (req, res) => {
 });
 
 app.post("/app/sites/", (req, res) => {
-    const user = "test" //req.session.user;
+    const user = req.session.user;
     const password = req.body;
     if (!user) {
         res.json({
@@ -102,7 +107,7 @@ app.post("/app/sites/", (req, res) => {
             reason: "session timed out"
         });
     } else {
-        db.query("INSERT INTO saved_passwords VALUES(?, ?, ?, ?)", [password.website, password.username,password.password, user],
+        db.query("INSERT INTO saved_passwords VALUES(?, ?, ?, ?)", [password.website, password.username, cypher.encryptText(password.password), user],
         (err, result) => {
             if (err) {
                 res.json({
@@ -123,6 +128,6 @@ app.listen(3000, (err) => {
         console.log(err);
     }
     console.log("Listening on port 3000");
-    console.log(Cypher.encryptText("hello world"));
+    console.log(cypher.decryptText(Buffer.from(cypher.encryptText("hello world"), "hex")));
 })
 

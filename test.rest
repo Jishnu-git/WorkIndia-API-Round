@@ -1,0 +1,36 @@
+POST http://localhost:3000/app/sites
+Content-Type: application/json
+
+{
+    "website": "google.com",
+    "username": "sampleUser",
+    "password": "pass123"
+}
+
+###
+
+GET http://localhost:3000/app/sites/list
+
+###
+
+POST http://localhost:3000/app/register
+Content-Type: application/json
+
+{
+    "username": "test2",
+    "password": "pass"
+}
+
+###
+
+POST http://localhost:3000/app/login
+Content-Type: application/json
+
+{
+    "username": "test2",
+    "password": "pass"
+}
+
+###
+
+POST http://localhost:3000/app/logout
