@@ -1,10 +1,11 @@
+const { Cipher } = require("crypto");
 const express = require("express");
 const app = express();
 const session = require("express-session");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-//app.use(express.static("Static/HTML"));
-//app.use(express.static("Static/JS"));
+app.use(express.static("Static/HTML"));
+app.use(express.static("Static/JS"));
 app.use(session({
     secret: "WorkIndia",
     saveUninitialized: false,
@@ -32,7 +33,7 @@ db.connect((err) => {
 
 const Cypher = require("./Services/CypherService");
 
-app.post("app/login/", (req, res) => {
+app.post("/app/login/", (req, res) => {
     const user = req.body;
     db.query("SELECT COUNT(*) AS valid FROM users WHERE username = ? AND password = ?", [user.username, user.password], (err, result) => {
         if (err || result[0].valid == 0) {
@@ -48,15 +49,31 @@ app.post("app/login/", (req, res) => {
     });
 });
 
-app.post("app/logout/", (req, res) => {
+app.post("/app/logout/", (req, res) => {
     req.session.user = null;
     res.json({
         status: "success"
     });
 })
 
-app.get("app/sites/list", (req, res) => {
-    const user = req.session.user | "test";
+app.post("/app/register/", (req, res) => {
+    const user = req.body;
+    db.query("INSERT INTO users VALUES(? ,?)", [user.username, user.password], (err, result) => {
+        if (err) {
+            res.json({
+                status: "failure",
+                reason: err
+             });
+        } else {
+            res.json({
+                status: "success"
+            });
+        }
+    });
+})
+
+app.get("/app/sites/list/", (req, res) => {
+    const user = "test" //req.session.user;
     if (!user) {
         res.json({
             status: "failure",
@@ -77,8 +94,8 @@ app.get("app/sites/list", (req, res) => {
     }
 });
 
-app.post("app/sites", (req, res) => {
-    const user = req.session.user | "test";
+app.post("/app/sites/", (req, res) => {
+    const user = "test" //req.session.user;
     const password = req.body;
     if (!user) {
         res.json({
@@ -102,7 +119,11 @@ app.post("app/sites", (req, res) => {
     }
 });
 
-app.listen(3000, () => {
+app.listen(3000, (err) => {
+    if (err) {
+        console.log(err);
+    }
     console.log("Listening on port 3000");
+    console.log(Cypher.encryptText("hello world"));
 })
 

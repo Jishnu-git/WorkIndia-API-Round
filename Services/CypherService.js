@@ -28,6 +28,6 @@ function decryptText(hex) {
 }
 
 module.exports = {
-    encryptText: encryptText,
-    decryptText: decryptText
-};
+    encryptText,
+    decryptText
+}
