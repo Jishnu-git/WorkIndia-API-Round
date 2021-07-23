@@ -3,8 +3,8 @@ const app = express();
 const session = require("express-session");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("Static/HTML"));
-app.use(express.static("Static/JS"));
+//app.use(express.static("Static/HTML"));
+//app.use(express.static("Static/JS"));
 app.use(session({
     secret: "WorkIndia",
     saveUninitialized: false,
@@ -100,5 +100,9 @@ app.post("app/sites", (req, res) => {
             }
         });
     }
+});
+
+app.listen(3000, () => {
+    console.log("Listening on port 3000");
 })
 
