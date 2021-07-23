@@ -1,4 +1,3 @@
-const { Cipher } = require("crypto");
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -103,7 +102,7 @@ app.post("/app/sites/", (req, res) => {
             reason: "session timed out"
         });
     } else {
-        db.query("INSERT INTO saved_passwords VALUES(?, ?, ?, ?)", [password.website, password.username, Cypher.encryptText(password.password), user],
+        db.query("INSERT INTO saved_passwords VALUES(?, ?, ?, ?)", [password.website, password.username,password.password, user],
         (err, result) => {
             if (err) {
                 res.json({
